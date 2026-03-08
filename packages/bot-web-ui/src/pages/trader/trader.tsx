@@ -47,7 +47,7 @@ const DTraderAutoLogin: React.FC<DTraderAutoLoginProps> = ({
         }
 
         try {
-            const clientAccountsStr = localStorage.getItem('clientAccounts') || '{}';
+            const clientAccountsStr = localStorage.getItem('client.accounts') || '{}';
             let currency = 'USD';
 
             try {
@@ -85,8 +85,18 @@ const DTraderAutoLogin: React.FC<DTraderAutoLoginProps> = ({
 
     const checkAuthAndUpdate = useCallback(() => {
         try {
-            const authToken = localStorage.getItem('authToken');
             const activeLoginId = localStorage.getItem('active_loginid');
+            const clientAccountsStr = localStorage.getItem('client.accounts') || '{}';
+
+            let authToken = '';
+            if (activeLoginId) {
+                try {
+                    const clientAccounts = JSON.parse(clientAccountsStr);
+                    authToken = clientAccounts[activeLoginId]?.token || '';
+                } catch (e) {
+                    console.error('Error parsing client accounts for token:', e);
+                }
+            }
 
             if (authToken && activeLoginId) {
                 buildIframeUrl(authToken, activeLoginId);

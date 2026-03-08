@@ -34,68 +34,10 @@ const getBlockly = () => {
 
 // Static bot configurations - Master bots
 const STATIC_BOTS = {
-    /*
-    even_odd_killer: {
-        id: 'even_odd_killer',
-        name: 'Even & Odd Smooth Killer',
-        xml: EvenOddSmoothKiller,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    money_gram_v2: {
-        id: 'money_gram_v2',
-        name: 'Money Gram V2 XRAY Auto',
-        xml: MoneyGramV2,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    money_gram_v1: {
-        id: 'money_gram_v1',
-        name: 'Money Gram V1 Auto',
-        xml: MoneyGramV1,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    pipspeed_trader: {
-        id: 'pipspeed_trader',
-        name: 'Pipspeed Dollar Overtrader',
-        xml: PipspeedTrader,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    rise_fall_bot: {
-        id: 'rise_fall_bot',
-        name: 'Rise and Fall Bot',
-        xml: RiseFallBot,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    */
-    vx_auto_switcher: {
-        id: 'vx_auto_switcher',
-        name: 'Bram Entrypoint V1',
-        xml: VxAutoSwitcher,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
     deriv_wizard: {
         id: 'deriv_wizard',
         name: 'Deriv Wizard',
         xml: DerivWizard,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    master_g8: {
-        id: 'master_g8',
-        name: 'V3',
-        xml: MasterG8ByStateFX,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    metro_v4: {
-        id: 'metro_v4',
-        name: 'Metro V4 Even Odd Bot',
-        xml: MetroV4EvenOddBot,
         timestamp: Date.now(),
         save_type: save_types.LOCAL,
     },
@@ -106,34 +48,6 @@ const STATIC_BOTS = {
         timestamp: Date.now(),
         save_type: save_types.LOCAL,
     },
-    state_xv1: {
-        id: 'state_xv1',
-        name: 'Bram Entrypoint V2',
-        xml: StateXV1,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    bram_speed_bot: {
-        id: 'bram_speed_bot',
-        name: 'Bram Speed Bot',
-        xml: BRAMSPEEDBOT,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    even_odd_auto_switcher: {
-        id: 'even_odd_auto_switcher',
-        name: 'Even Odd Auto Switcher',
-        xml: EvenOddAutoSwitcher,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    even_odd_trend_bot: {
-        id: 'even_odd_trend_bot',
-        name: 'Even Odd Trend Bot',
-        xml: EvenOddTrendBot,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
     over_under_switcher_bot: {
         id: 'over_under_switcher_bot',
         name: 'Over Under Switcher Bot',
@@ -141,27 +55,6 @@ const STATIC_BOTS = {
         timestamp: Date.now(),
         save_type: save_types.LOCAL,
     },
-    rise_fall_switcher_bot: {
-        id: 'rise_fall_switcher_bot',
-        name: 'Rise Fall Switcher Bot',
-        xml: RiseFallswitcherBot,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    states_digit_switcher: {
-        id: 'states_digit_switcher',
-        name: 'STATES Digit Switcher',
-        xml: STATESDigitSwitcher,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    percentage_even_odd_bot: {
-        id: 'percentage_even_odd_bot',
-        name: 'Percentage Even Odd Bot',
-        xml: PercentageEvenOddBot,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    }
 };
 
 const getStaticBots = () => Object.values(STATIC_BOTS);

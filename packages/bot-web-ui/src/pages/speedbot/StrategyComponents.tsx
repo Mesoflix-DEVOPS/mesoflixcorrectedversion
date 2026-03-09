@@ -12,9 +12,13 @@ export const AnalysisHeader = observer(({ digit_counts, last_digit }: { digit_co
 
     return (
         <div className="qs-analysis-header">
+            <div className="qs-risk-badge" style={{ marginBottom: '16px' }}>
+                <Icon icon="IcAlertDanger" custom_color="#ff7a00" size={14} />
+                <Localize i18n_default_text="RISK DISCLAIMER" />
+            </div>
             <div className="qs-analysis-title">
                 <MdTrendingUp className="qs-icon" />
-                <Text size="xs" weight="bold"><Localize i18n_default_text="DIGIT DISTRIBUTION (1000 TICKS)" /></Text>
+                <Text size="xs" weight="bold" family="outfit"><Localize i18n_default_text="DIGIT DISTRIBUTION (1000 TICKS)" /></Text>
             </div>
             <div className="qs-digit-circles">
                 {digit_counts.map((count, index) => {
@@ -177,7 +181,7 @@ export const TransactionTable = observer(({ trades }: { trades: any[] }) => {
         <div className="qs-transaction-table">
             <div className="qs-table-header">
                 <MdHistory className="qs-icon" />
-                <Text size="xs" weight="bold"><Localize i18n_default_text="RECENT TRANSACTIONS" /></Text>
+                <Text size="xs" weight="bold" family="outfit"><Localize i18n_default_text="RECENT TRANSACTIONS" /></Text>
             </div>
             <div className="qs-table-container">
                 <table>
@@ -198,17 +202,21 @@ export const TransactionTable = observer(({ trades }: { trades: any[] }) => {
                                 </td>
                             </tr>
                         ) : (
-                            trades.map((trade, index) => (
-                                <tr key={index}>
-                                    <td>{trade.ref}</td>
-                                    <td>{trade.contract_type}</td>
-                                    <td>{formatMoney('USD', trade.buy_price, true)}</td>
-                                    <td className={`result-${trade.status}`}>{trade.status.toUpperCase()}</td>
-                                    <td className={trade.profit >= 0 ? 'profit' : 'loss'}>
-                                        {trade.profit !== undefined ? formatMoney('USD', trade.profit, true) : '-'}
-                                    </td>
-                                </tr>
-                            ))
+                            trades.map((trade, index) => {
+                                const statusClass = trade.status === 'won' ? 'result-won' :
+                                    trade.status === 'lost' ? 'result-lost' : 'result-pending';
+                                return (
+                                    <tr key={index}>
+                                        <td>{trade.ref || `#${index}`}</td>
+                                        <td>{trade.contract_type}</td>
+                                        <td>{formatMoney('USD', trade.buy_price, true)}</td>
+                                        <td className={statusClass}>{trade.status.toUpperCase()}</td>
+                                        <td className={trade.profit >= 0 ? 'profit' : 'loss'}>
+                                            {trade.profit !== undefined ? formatMoney('USD', trade.profit, true) : '-'}
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>

@@ -115,7 +115,7 @@ const QuickStrategy = observer(() => {
             }
         };
         fetchSymbols();
-    }, []);
+    }, [client.is_logged_in]);
 
     const requestTickHistory = useCallback(async (symbol: string) => {
         if (!api_base.api) return;
@@ -150,6 +150,8 @@ const QuickStrategy = observer(() => {
 
     // Effect for subscription and real-time updates
     useEffect(() => {
+        if (!api_base.api) return;
+
         requestTickHistory(selectedMarket);
 
         const messageSub = api_base.api.onMessage().subscribe(({ data }: { data: any }) => {
@@ -164,12 +166,12 @@ const QuickStrategy = observer(() => {
         });
 
         return () => {
-            messageSub.unsubscribe();
+            if (messageSub) messageSub.unsubscribe();
             if (subscriptionId.current && api_base.api) {
                 api_base.api.send({ forget: subscriptionId.current });
             }
         };
-    }, [selectedMarket, requestTickHistory]);
+    }, [selectedMarket, requestTickHistory, client.is_logged_in]); // Added client.is_logged_in as a dependency to retry when login status changes
 
     const handleMarketChange = (newSymbol: string) => {
         setSelectedMarket(newSymbol);

@@ -899,7 +899,7 @@ export default class ClientStore extends BaseStore {
             is_current_mf || //is_currently logged in mf account via tradershub
             (financial_shortcode || gaming_shortcode || mt_gaming_shortcode
                 ? (eu_shortcode_regex.test(financial_shortcode) && gaming_shortcode !== 'svg') ||
-                  eu_shortcode_regex.test(gaming_shortcode)
+                eu_shortcode_regex.test(gaming_shortcode)
                 : eu_excluded_regex.test(this.residence))
         );
     }
@@ -1086,8 +1086,14 @@ export default class ClientStore extends BaseStore {
     resetLocalStorageValues(loginid) {
         this.accounts[loginid].accepted_bch = 0;
         LocalStore.setObject(storage_key, this.accounts);
-        if (/^(CR|MF|VRTC)\d/.test(loginid)) sessionStorage.setItem('active_loginid', loginid);
-        if (/^(CRW|MFW|VRW)\d/.test(loginid)) sessionStorage.setItem('active_wallet_loginid', loginid);
+        if (/^(CR|MF|VRTC)\d/.test(loginid)) {
+            sessionStorage.setItem('active_loginid', loginid);
+            localStorage.setItem('active_loginid', loginid);
+        }
+        if (/^(CRW|MFW|VRW)\d/.test(loginid)) {
+            sessionStorage.setItem('active_wallet_loginid', loginid);
+            localStorage.setItem('active_wallet_loginid', loginid);
+        }
         this.setUrlParams();
         this.syncWithLegacyPlatforms(loginid, toJS(this.accounts));
         this.loginid = loginid;
@@ -1392,18 +1398,18 @@ export default class ClientStore extends BaseStore {
                 ...response,
                 ...(is_maltainvest_account
                     ? {
-                          new_account_maltainvest: {
-                              ...response.new_account_maltainvest,
-                              currency,
-                          },
-                      }
+                        new_account_maltainvest: {
+                            ...response.new_account_maltainvest,
+                            currency,
+                        },
+                    }
                     : {}),
                 ...(is_samoa_account
                     ? {
-                          new_account_samoa: {
-                              currency,
-                          },
-                      }
+                        new_account_samoa: {
+                            currency,
+                        },
+                    }
                     : {}),
             });
         }
@@ -1629,8 +1635,8 @@ export default class ClientStore extends BaseStore {
         } else
             this.setLoginId(
                 window.sessionStorage.getItem('active_loginid') ||
-                    window.sessionStorage.getItem('active_wallet_loginid') ||
-                    LocalStore.get('active_loginid')
+                window.sessionStorage.getItem('active_wallet_loginid') ||
+                LocalStore.get('active_loginid')
             );
         this.user_id = LocalStore.get('active_user_id');
         this.setAccounts(LocalStore.getObject(storage_key));
@@ -1900,11 +1906,11 @@ export default class ClientStore extends BaseStore {
         const ppc_campaign_cookies =
             Cookies.getJSON('utm_data') === 'null'
                 ? {
-                      utm_source: 'no source',
-                      utm_medium: 'no medium',
-                      utm_campaign: 'no campaign',
-                      utm_content: 'no content',
-                  }
+                    utm_source: 'no source',
+                    utm_medium: 'no medium',
+                    utm_campaign: 'no campaign',
+                    utm_content: 'no content',
+                }
                 : Cookies.getJSON('utm_data');
 
         let residence_country = '';
@@ -2066,9 +2072,9 @@ export default class ClientStore extends BaseStore {
             if (window.location.pathname.includes(routes.wallets)) {
                 this.resetLocalStorageValues(
                     window.sessionStorage.getItem('active_loginid') ??
-                        localStorage.getItem('active_loginid') ??
-                        sessionStorage.getItem('active_wallet_loginid') ??
-                        this.loginid
+                    localStorage.getItem('active_loginid') ??
+                    sessionStorage.getItem('active_wallet_loginid') ??
+                    this.loginid
                 );
                 return;
             }
@@ -2304,10 +2310,14 @@ export default class ClientStore extends BaseStore {
                     localStorage.setItem('verification_code.payment_withdraw', verification_code);
                 }
             }
-            if (/^(CR|MF|VRTC)\d/.test(active_loginid)) sessionStorage.setItem('active_loginid', active_loginid);
-            if (/^(CRW|MFW|VRW)\d/.test(active_loginid))
+            if (/^(CR|MF|VRTC)\d/.test(active_loginid)) {
+                sessionStorage.setItem('active_loginid', active_loginid);
+                localStorage.setItem('active_loginid', active_loginid);
+            }
+            if (/^(CRW|MFW|VRW)\d/.test(active_loginid)) {
                 sessionStorage.setItem('active_wallet_loginid', active_loginid);
-            localStorage.setItem('active_loginid', active_loginid);
+                localStorage.setItem('active_wallet_loginid', active_loginid);
+            }
             localStorage.setItem('client.accounts', JSON.stringify(client_object));
             this.syncWithLegacyPlatforms(active_loginid, this.accounts);
         }

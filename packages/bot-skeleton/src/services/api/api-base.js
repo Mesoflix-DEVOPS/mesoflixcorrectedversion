@@ -72,10 +72,20 @@ class APIBase {
             window.addEventListener('storage', (event) => {
                 if (event.key === 'active_loginid' && event.newValue && event.newValue !== this.account_id) {
                     // eslint-disable-next-line no-console
-                    console.log(`[APIBase] Account switched to ${event.newValue} — re-initializing API.`);
+                    console.log(`[APIBase] Account switched via storage to ${event.newValue} — re-initializing API.`);
                     this.createNewInstance(event.newValue);
                 }
             });
+
+            // Listen for manual account switch events (for same-tab updates on mobile)
+            globalObserver.register('client.switch_account', (loginid) => {
+                if (loginid && loginid !== this.account_id) {
+                    // eslint-disable-next-line no-console
+                    console.log(`[APIBase] Account switched via observer to ${loginid} — re-initializing API.`);
+                    this.createNewInstance(loginid);
+                }
+            });
+
             this.listeners_initialized = true;
         }
     }

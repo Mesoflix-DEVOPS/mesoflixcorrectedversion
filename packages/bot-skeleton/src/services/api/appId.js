@@ -16,7 +16,10 @@ export const generateDerivApiInstance = () => {
 };
 
 export const getLoginId = () => {
-    const login_id = localStorage.getItem('active_loginid');
+    let login_id = localStorage.getItem('active_loginid');
+    if (!login_id || login_id === 'null') {
+        login_id = sessionStorage.getItem('active_loginid');
+    }
     if (login_id && login_id !== 'null') return login_id;
     return null;
 };

@@ -4,25 +4,7 @@ import DBotStore from '../scratch/dbot-store';
 import { save_types } from '../constants/save-type';
 
 // Import bots from master folder
-import DerivWizard from './master/Derivwizard.xml';
-import MasterG8ByStateFX from './master/MasterG8ByStateFx.xml';
-import MetroV4EvenOddBot from './master/Metrov4EvenandOddDigitBotUpdated.xml';
-import StateHNR from './master/STATEHNR.xml';
-import StateXV1 from './master/STATEXV1.xml';
-import BRAMSPEEDBOT from './buru/BRAMSPEEDBOT.xml';
-import EvenOddAutoSwitcher from './buru/EvenOddAutoSwitcher.xml';
-import VxAutoSwitcher from './buru/Vx.xml';
-import EvenOddSmoothKiller from './mentor/EVEN&ODDsmoothKILLER.xml';
-import MoneyGramV2 from './mentor/MoneyGRAMV2XRAYAUTO.xml';
-import MoneyGramV1 from './mentor/MoneyGramV1AUTO.xml';
-import PipspeedTrader from './mentor/PipspeedDollarOVERTRADER.xml';
-import RiseFallBot from './mentor/RiseandfallBOT.xml';
-import EvenOddTrendBot from './muley/EvenOddTrendBot.xml';
-import OverUnderSwitcherBot from './muley/OverUnderSwitcherBot.xml';
-import RiseFallswitcherBot from './muley/RiseFallswitcherBot.xml';
-import STATESDigitSwitcher from './muley/STATESDigitSwitcher.xml.xml';
-import PercentageEvenOddBot from './muley/percentageEvenOddBot.xml';
-
+import QuantumXElite from './master/QuantumX Elite Version 2 by Brian Fx.xml';
 
 // Ensure Blockly is available globally
 const getBlockly = () => {
@@ -34,24 +16,10 @@ const getBlockly = () => {
 
 // Static bot configurations - Master bots
 const STATIC_BOTS = {
-    deriv_wizard: {
-        id: 'deriv_wizard',
-        name: 'Deriv Wizard',
-        xml: DerivWizard,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    state_hnr: {
-        id: 'state_hnr',
-        name: 'Begginer Bot',
-        xml: StateHNR,
-        timestamp: Date.now(),
-        save_type: save_types.LOCAL,
-    },
-    over_under_switcher_bot: {
-        id: 'over_under_switcher_bot',
-        name: 'Over Under Switcher Bot',
-        xml: OverUnderSwitcherBot,
+    quantumx_elite: {
+        id: 'quantumx_elite',
+        name: 'QuantumX Elite Version 2 by Brian Fx',
+        xml: QuantumXElite,
         timestamp: Date.now(),
         save_type: save_types.LOCAL,
     },

@@ -145,7 +145,13 @@ const copyConfig = base => {
             from: path.resolve(__dirname, '../src/public/images/common/logos/platform_logos/'),
             to: 'public/images/common/logos/platform_logos/',
         },
+        { from: path.resolve(__dirname, '../src/public/images/app/common/'), to: 'public/images/app/common/' },
         { from: path.resolve(__dirname, '../src/public/images/app/header/'), to: 'public/images/app/header/' },
+        {
+            from: path.resolve(__dirname, '../src/public/images/common/charts-logo.svg'),
+            to: 'public/images/common/charts-logo.svg',
+            toType: 'file',
+        },
         {
             from: path.resolve(__dirname, '../../../node_modules/@deriv/components/lib/icon/sprites'),
             to: 'public/sprites',
@@ -239,20 +245,20 @@ const htmlOutputConfig = is_release => ({
     filename: 'index.html',
     meta: is_release
         ? {
-              versionMetaTAG: {
-                  name: 'version',
-                  content: gitRevisionPlugin.version(),
-              },
-          }
+            versionMetaTAG: {
+                name: 'version',
+                content: gitRevisionPlugin.version(),
+            },
+        }
         : {},
     minify: !is_release
         ? false
         : {
-              collapseWhitespace: true,
-              removeComments: true,
-              removeRedundantAttributes: true,
-              useShortDoctype: true,
-          },
+            collapseWhitespace: true,
+            removeComments: true,
+            removeRedundantAttributes: true,
+            useShortDoctype: true,
+        },
 });
 
 const htmlInjectConfig = () => ({
@@ -268,6 +274,13 @@ const htmlInjectConfig = () => ({
             path: 'favicon.ico',
             attributes: {
                 rel: 'icon',
+            },
+        },
+        {
+            path: 'public/images/favicons/favicon.svg',
+            attributes: {
+                rel: 'icon',
+                type: 'image/svg+xml',
             },
         },
         ...[

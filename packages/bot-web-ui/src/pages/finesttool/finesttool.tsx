@@ -6,7 +6,7 @@ const Finesttool = () => {
         <div className={styles.container}>
             <iframe
                 src="https://mesoflxadvanced.netlify.app/"
-                title="BrianBinary Analysis"
+                title="Brian Binary Analysis"
                 className={styles.iframe}
                 allowFullScreen
             />

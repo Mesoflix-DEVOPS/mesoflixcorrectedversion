@@ -23,7 +23,7 @@ const PlatformSwitcher = () => {
                 WebkitTextFillColor: 'transparent',
                 letterSpacing: '0.5px'
             }}>
-                BrianBinary
+                Brian Binary
             </span>
         </div>
     );

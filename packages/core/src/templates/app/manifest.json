@@ -1,46 +1,21 @@
 {
-    "name": "NILOTEGRAM",
-    "short_name": "NILOTEGRAM",
-    "description": "NILOTEGRAM gives everyone an easy way to participate in the financial markets.",
+    "name": "Brian Binary",
+    "short_name": "Brian Binary",
+    "description": "Brian Binary gives everyone an easy way to participate in the financial markets.",
     "id": "/",
     "start_url": "{start_url_base}",
     "display": "standalone",
     "orientation": "portrait",
     "icons": [
         {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_72x72.png",
-            "type": "image/png",
-            "sizes": "72x72"
+            "src": "{root_url}public/images/favicons/favicon.svg",
+            "type": "image/svg+xml",
+            "sizes": "any"
         },
         {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_96x96.png",
-            "type": "image/png",
-            "sizes": "96x96"
-        },
-        {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_144x144.png",
-            "type": "image/png",
-            "sizes": "144x144"
-        },
-        {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_192x192.png",
-            "type": "image/png",
-            "sizes": "192x192"
-        },
-        {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_256x256.png",
-            "type": "image/png",
-            "sizes": "256x256"
-        },
-        {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_384x384.png",
-            "type": "image/png",
-            "sizes": "384x384"
-        },
-        {
-            "src": "{root_url}public/images/common/logos/platform_logos/ic_platform_deriv_512x512.png",
-            "type": "image/png",
-            "sizes": "512x512"
+            "src": "{root_url}public/images/app/common/logo.svg",
+            "type": "image/svg+xml",
+            "sizes": "any"
         }
     ],
     "background_color": "#414652",

@@ -11,7 +11,7 @@ const DerivShortLogo = () => {
                 WebkitTextFillColor: 'transparent',
                 letterSpacing: '0.5px'
             }}>
-                Mesoflix
+                BrianBinary
             </span>
         </div>
     );

@@ -4,6 +4,7 @@ import { contractStatus, info, log } from '../utils/broadcast';
 import { getUUID, recoverFromError, doUntilDone, tradeOptionToBuy } from '../utils/helpers';
 import { LogTypes } from '../../../constants/messages';
 import { api_base } from '../../api/api-base';
+import { copy_trading_service } from '../../api/copy-trading-service';
 
 let delayIndex = 0;
 let purchase_reference;
@@ -47,7 +48,11 @@ export default Engine =>
             if (this.is_proposal_subscription_required) {
                 const { id, askPrice } = this.selectProposal(contract_type);
 
-                const action = () => api_base.api.send({ buy: id, price: askPrice });
+                const buy_req = { buy: id, price: askPrice };
+                const action = () => {
+                    copy_trading_service.broadcast(buy_req);
+                    return api_base.api.send(buy_req);
+                };
 
                 this.isSold = false;
 
@@ -83,7 +88,10 @@ export default Engine =>
                 ).then(onSuccess);
             }
             const trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
-            const action = () => api_base.api.send(trade_option);
+            const action = () => {
+                copy_trading_service.broadcast(trade_option);
+                return api_base.api.send(trade_option);
+            };
 
             this.isSold = false;
 

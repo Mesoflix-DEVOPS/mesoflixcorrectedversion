@@ -1,6 +1,11 @@
+/// <reference path="../../types/global.d.ts" />
+// @ts-ignore
 import React, { useState, useEffect } from 'react';
+// @ts-ignore
 import { FaYoutube, FaTrash, FaPlus, FaCheckCircle, FaTimesCircle, FaDesktop, FaSyncAlt, FaShieldAlt } from 'react-icons/fa';
-import { copy_trading_service } from '../../services/api/copy-trading-service';
+// @ts-ignore
+import { copy_trading_service } from '@deriv/bot-skeleton/services/api/copy-trading-service';
+
 
 const TokenManager: React.FC = () => {
     const [token, setToken] = useState('');
@@ -83,7 +88,7 @@ const TokenManager: React.FC = () => {
     };
 
     const removeToken = (tokenToRemove: string) => {
-        const newTokens = savedTokens.filter(t => t !== tokenToRemove);
+        const newTokens = savedTokens.filter((t: string) => t !== tokenToRemove);
         localStorage.setItem('deriv_copy_tokens', JSON.stringify(newTokens));
         setSavedTokens(newTokens);
         copy_trading_service.removeSubscriber(tokenToRemove);
@@ -210,7 +215,7 @@ const TokenManager: React.FC = () => {
                             type="password"
                             placeholder="Enter Subscriber API Token"
                             value={token}
-                            onChange={(e) => setToken(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setToken(e.target.value)}
                             style={{
                                 width: '100%',
                                 padding: '16px 20px',
@@ -281,7 +286,7 @@ const TokenManager: React.FC = () => {
                         <p style={{ margin: 0, fontSize: '14px' }}>Add subscriber tokens above to build your trading network</p>
                     </div>
                 ) : (
-                    savedTokens.map((t, i) => (
+                    savedTokens.map((t: string, i: number) => (
                         <div key={i} style={{
                             backgroundColor: '#161b22',
                             padding: '24px',
@@ -369,8 +374,6 @@ const TokenManager: React.FC = () => {
         </div>
     );
 };
-
-export default TokenManager;
 
 
 export default TokenManager;

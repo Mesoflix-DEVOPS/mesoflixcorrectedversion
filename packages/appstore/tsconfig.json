@@ -19,5 +19,5 @@
             "@deriv/*": ["../*/src"]
         }
     },
-    "include": ["src", "../../utils.d.ts"]
+    "include": ["src", "src/types/global.d.ts", "../../utils.d.ts"]
 }

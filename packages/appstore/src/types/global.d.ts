@@ -12,5 +12,10 @@ declare module 'react/jsx-dev-runtime' {
 declare module '@deriv/components';
 declare module '@deriv/shared';
 declare module '@deriv/account';
-
-declare module '@binary-com/binary-document-uploader';
+declare module '@deriv/cashier';
+declare module '@deriv/cfd';
+declare module '@deriv/stores';
+declare module '@deriv/translations';
+declare module '@deriv/hooks';
+declare module '@deriv/quill-icons';
+declare module '@deriv/wallets';

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore
 import { FaYoutube, FaTrash, FaPlus, FaCheckCircle, FaTimesCircle, FaDesktop, FaSyncAlt, FaShieldAlt } from 'react-icons/fa';
 // @ts-ignore
-import { copy_trading_service } from '@deriv/bot-skeleton/services/api/copy-trading-service';
+import { copy_trading_service } from '@deriv/bot-skeleton/src/services/api/copy-trading-service';
 
 
 const TokenManager: React.FC = () => {

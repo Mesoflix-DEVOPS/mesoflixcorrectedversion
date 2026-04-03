@@ -15,7 +15,7 @@
         ]
     },
     "engines": {
-        "node": "24.x"
+        "node": "18"
     },
     "scripts": {
         "analyze:stats": "npm run build:skeleton && webpack --progress --profile --json=stats.json",

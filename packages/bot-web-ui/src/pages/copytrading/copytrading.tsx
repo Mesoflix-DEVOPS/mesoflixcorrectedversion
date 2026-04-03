@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaYoutube, FaTrash, FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaYoutube, FaTrash, FaPlus, FaCheckCircle, FaTimesCircle, FaDesktop, FaSyncAlt, FaShieldAlt } from 'react-icons/fa';
 import { copy_trading_service } from '../../services/api/copy-trading-service';
 
 const TokenManager: React.FC = () => {
@@ -8,6 +8,7 @@ const TokenManager: React.FC = () => {
     const [toast, setToast] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
     const [isMobile, setIsMobile] = useState(false);
     const [isCopyTrading, setIsCopyTrading] = useState(false);
+    const [systemStatus, setSystemStatus] = useState<'connected' | 'disconnected' | 'idle'>('idle');
 
     // Inject global CSS once on mount
     useEffect(() => {
@@ -16,6 +17,11 @@ const TokenManager: React.FC = () => {
             const styleEl = document.createElement('style');
             styleEl.id = styleId;
             styleEl.textContent = `
+                @keyframes pulse-green {
+                    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+                    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+                }
                 @keyframes slideInRight {
                     from { transform: translateX(100%); opacity: 0; }
                     to   { transform: translateX(0);    opacity: 1; }
@@ -23,14 +29,12 @@ const TokenManager: React.FC = () => {
                 @media (max-width: 768px) {
                     input, textarea, select { font-size: 16px !important; }
                     button { touch-action: manipulation; }
-                    body { -webkit-overflow-scrolling: touch; overflow-x: hidden; }
                 }
             `;
             document.head.appendChild(styleEl);
         }
     }, []);
 
-    // Check if mobile on mount and resize
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth <= 768);
         checkMobile();
@@ -38,7 +42,6 @@ const TokenManager: React.FC = () => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Auto-dismiss toast after 3 seconds
     useEffect(() => {
         if (toast) {
             const timer = setTimeout(() => setToast(null), 3000);
@@ -46,356 +49,328 @@ const TokenManager: React.FC = () => {
         }
     }, [toast]);
 
-    // Load saved tokens and status on component mount
     useEffect(() => {
         try {
             const tokens_str = localStorage.getItem('deriv_copy_tokens');
             if (tokens_str) {
                 setSavedTokens(JSON.parse(tokens_str));
-            } else {
-                // Migration: Check for old single token
-                const old = localStorage.getItem('deriv_copier_token') || localStorage.getItem('deriv_copy_user_token');
-                if (old) {
-                    setSavedTokens([old]);
-                    localStorage.setItem('deriv_copy_tokens', JSON.stringify([old]));
-                }
             }
-
             const enabled = localStorage.getItem('is_copy_trading_enabled') === 'true';
             setIsCopyTrading(enabled);
+            setSystemStatus(enabled ? 'connected' : 'idle');
         } catch (error) {
-            console.error('Error loading saved tokens:', error);
+            console.error('Error loading copytrading settings:', error);
         }
     }, []);
 
     const saveToken = () => {
         const t = token.trim();
-        if (!t) { setToast({ type: 'err', text: 'Token is empty' }); return; }
-        if (t.length < 10) { setToast({ type: 'err', text: 'Token is too short' }); return; }
-        if (savedTokens.includes(t)) { setToast({ type: 'err', text: 'Token already exists' }); return; }
+        if (!t) return;
+        if (savedTokens.includes(t)) {
+            setToast({ type: 'err', text: 'Token already added' });
+            return;
+        }
 
-        try {
-            const newTokens = [...savedTokens, t];
-            localStorage.setItem('deriv_copy_tokens', JSON.stringify(newTokens));
-            setSavedTokens(newTokens);
-            setToken('');
-            setToast({ type: 'ok', text: 'Token added successfully' });
+        const newTokens = [...savedTokens, t];
+        localStorage.setItem('deriv_copy_tokens', JSON.stringify(newTokens));
+        setSavedTokens(newTokens);
+        setToken('');
+        setToast({ type: 'ok', text: 'Subscriber synced successfully' });
 
-            if (isCopyTrading) {
-                copy_trading_service.addSubscriber(t);
-            }
-        } catch (error) {
-            console.error('Error saving token:', error);
-            setToast({ type: 'err', text: 'Failed to save token' });
+        if (isCopyTrading) {
+            copy_trading_service.addSubscriber(t);
         }
     };
 
     const removeToken = (tokenToRemove: string) => {
-        try {
-            const newTokens = savedTokens.filter(t => t !== tokenToRemove);
-            localStorage.setItem('deriv_copy_tokens', JSON.stringify(newTokens));
-            setSavedTokens(newTokens);
-
-            copy_trading_service.removeSubscriber(tokenToRemove);
-
-            setToast({ type: 'ok', text: 'Token removed successfully' });
-            if (newTokens.length === 0 && isCopyTrading) {
-                toggleCopyTrading();
-            }
-        } catch (error) {
-            console.error('Error removing token:', error);
-            setToast({ type: 'err', text: 'Failed to remove token' });
-        }
+        const newTokens = savedTokens.filter(t => t !== tokenToRemove);
+        localStorage.setItem('deriv_copy_tokens', JSON.stringify(newTokens));
+        setSavedTokens(newTokens);
+        copy_trading_service.removeSubscriber(tokenToRemove);
+        setToast({ type: 'ok', text: 'Subscriber removed' });
     };
 
     const toggleCopyTrading = () => {
         const newState = !isCopyTrading;
         if (newState && savedTokens.length === 0) {
-            setToast({ type: 'err', text: 'Please add at least one token first' });
+            setToast({ type: 'err', text: 'Add at least one subscriber account' });
             return;
         }
 
         setIsCopyTrading(newState);
         copy_trading_service.setEnabled(newState);
+        setSystemStatus(newState ? 'connected' : 'idle');
         setToast({
             type: 'ok',
-            text: newState ? 'Copy trading started' : 'Copy trading stopped'
+            text: newState ? 'Real-time execution sync started' : 'Sync suspended'
         });
     };
 
     return (
         <div style={{
-            position: 'fixed',
-            width: '100%',
-            height: isMobile ? '70vh' : '75vh',
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
             display: 'flex',
-            flexDirection: 'column' as const,
-            padding: isMobile ? '10px' : '20px',
-            boxSizing: 'border-box' as const,
-            overflowX: 'hidden' as const,
-            overflowY: 'auto' as const,
-            backgroundColor: '#f4f7f6', // Slightly lighter grey/blue
-            WebkitOverflowScrolling: 'touch' as const
+            flexDirection: 'column',
+            backgroundColor: '#0e1117', // Darker, premium background
+            color: '#e6edf3',
+            overflowY: 'auto',
+            padding: isMobile ? '15px' : '40px',
+            fontFamily: "'Inter', sans-serif"
         }}>
-            {/* Header Section */}
+            {/* Top Bar / Header */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '20px',
-                flexDirection: isMobile ? 'column' : 'row' as const,
-                gap: '15px'
+                marginBottom: '30px',
+                flexWrap: 'wrap',
+                gap: '20px'
             }}>
-                <h2 style={{
-                    fontWeight: '800',
-                    fontSize: isMobile ? '22px' : '28px',
-                    margin: 0,
-                    color: '#1a237e',
-                    textAlign: isMobile ? 'center' : 'left' as const
-                }}>
-                    Copytrading Hub
-                </h2>
+                <div>
+                    <h1 style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 800, margin: 0, color: '#fff' }}>
+                        System Execution Sync
+                    </h1>
+                    <p style={{ margin: '5px 0 0 0', color: '#8b949e', fontSize: '14px' }}>
+                        Real-time trade replication for Mesoflix Systems
+                    </p>
+                </div>
 
-                {savedTokens.length > 0 && (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 16px',
+                        backgroundColor: '#161b22',
+                        borderRadius: '20px',
+                        border: '1px solid #30363d',
+                        fontSize: '13px'
+                    }}>
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: systemStatus === 'connected' ? '#238636' : '#8b949e',
+                            boxShadow: systemStatus === 'connected' ? '0 0 8px #238636' : 'none'
+                        }} />
+                        {systemStatus === 'connected' ? 'System Active' : 'System Standby'}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Action Card */}
+            <div style={{
+                background: 'linear-gradient(135deg, #161b22 0%, #0d1117 100%)',
+                borderRadius: '16px',
+                padding: isMobile ? '20px' : '32px',
+                border: '1px solid #30363d',
+                marginBottom: '30px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '20px' }}>
+                    <div style={{ flex: 1, minWidth: '280px' }}>
+                        <h2 style={{ fontSize: '20px', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <FaSyncAlt style={{ color: '#58a6ff' }} /> Master Controller
+                        </h2>
+                        <p style={{ color: '#8b949e', fontSize: '14px', lineHeight: '1.5' }}>
+                            When enabled, every trade executed by this terminal will be instantly replicated across all synced subscriber accounts using our low-latency bridge.
+                        </p>
+                    </div>
+                    
                     <button
+                        onClick={toggleCopyTrading}
                         style={{
-                            backgroundColor: isCopyTrading ? '#ef5350' : '#4CAF50',
+                            backgroundColor: isCopyTrading ? '#da3633' : '#238636',
                             color: 'white',
                             border: 'none',
-                            padding: '12px 24px',
-                            borderRadius: '30px',
+                            padding: '16px 32px',
+                            borderRadius: '12px',
                             fontWeight: '700',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '10px',
-                            width: isMobile ? '100%' : 'auto',
-                            justifyContent: 'center'
+                            gap: '12px',
+                            transition: 'all 0.2s',
+                            boxShadow: isCopyTrading ? '0 4px 14px rgba(218, 54, 51, 0.4)' : '0 4px 14px rgba(35, 134, 54, 0.4)',
+                            animation: isCopyTrading ? 'pulse-green 2s infinite' : 'none'
                         }}
-                        onClick={toggleCopyTrading}
                     >
                         {isCopyTrading ? <FaTimesCircle /> : <FaCheckCircle />}
-                        {isCopyTrading ? 'Stop Copying' : 'Start Copying'}
+                        {isCopyTrading ? 'Stop All Sync' : 'Start System Sync'}
                     </button>
-                )}
-            </div>
-
-            {/* Status Banner */}
-            {savedTokens.length > 0 && (
-                <div style={{
-                    padding: '15px 20px',
-                    borderRadius: '12px',
-                    backgroundColor: isCopyTrading ? '#e8f5e9' : '#fff3e0',
-                    borderLeft: `6px solid ${isCopyTrading ? '#4caf50' : '#ffb74d'}`,
-                    marginBottom: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '15px',
-                    fontSize: '15px',
-                    color: isCopyTrading ? '#2e7d32' : '#e65100',
-                    fontWeight: '600'
-                }}>
-                    <div style={{
-                        width: '12px', height: '12px',
-                        backgroundColor: isCopyTrading ? '#4caf50' : '#ffb74d',
-                        borderRadius: '50%',
-                        boxShadow: isCopyTrading ? '0 0 8px #4caf50' : 'none'
-                    }} />
-                    <span>
-                        {isCopyTrading
-                            ? `Active: Copying trades to ${savedTokens.length} account${savedTokens.length > 1 ? 's' : ''}`
-                            : 'Inactive: Not copying trades. Click start to begin.'}
-                    </span>
                 </div>
-            )}
 
-            {/* Add Token Section */}
-            <div style={{
-                backgroundColor: 'white',
-                borderRadius: '16px',
-                padding: isMobile ? '20px' : '25px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                marginBottom: '25px'
-            }}>
-                <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#333' }}>Add Subscriber Token</h3>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row' as const,
-                    gap: '12px'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        backgroundColor: '#f5f5f5',
-                        padding: '10px',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        minWidth: '100px',
-                        border: '1px solid #eee'
-                    }}>
-                        <FaYoutube style={{ color: '#FF0000', fontSize: '20px' }} />
-                        <span style={{ fontSize: '12px', fontWeight: '600' }}>Tutorial</span>
+                <div style={{ height: '1px', backgroundColor: '#30363d', margin: '24px 0' }} />
+
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, position: 'relative', minWidth: '300px' }}>
+                        <input
+                            type="password"
+                            placeholder="Enter Subscriber API Token"
+                            value={token}
+                            onChange={(e) => setToken(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '16px 20px',
+                                backgroundColor: '#0d1117',
+                                border: '1px solid #30363d',
+                                borderRadius: '12px',
+                                color: 'white',
+                                fontSize: '15px',
+                                outline: 'none',
+                                boxSizing: 'border-box'
+                            }}
+                        />
                     </div>
-                    <input
-                        type="password"
-                        placeholder="Enter Deriv API Token"
-                        value={token}
-                        onChange={e => setToken(e.target.value)}
-                        style={{
-                            flex: 1,
-                            padding: '14px 18px',
-                            border: '2px solid #edf2f7',
-                            borderRadius: '10px',
-                            fontSize: '16px',
-                            outline: 'none',
-                            backgroundColor: '#fafafa',
-                            transition: 'border-color 0.2s'
-                        }}
-                        onFocus={(e) => { e.target.style.borderColor = '#4a90e2'; }}
-                        onBlur={(e) => { e.target.style.borderColor = '#edf2f7'; }}
-                    />
                     <button
                         onClick={saveToken}
                         disabled={!token}
                         style={{
-                            backgroundColor: '#4a90e2',
-                            color: 'white',
-                            border: 'none',
-                            padding: '14px 25px',
-                            borderRadius: '10px',
-                            fontWeight: '700',
+                            padding: '16px 24px',
+                            backgroundColor: '#21262d',
+                            color: '#c9d1d9',
+                            border: '1px solid #30363d',
+                            borderRadius: '12px',
+                            fontWeight: '600',
                             cursor: token ? 'pointer' : 'not-allowed',
-                            opacity: token ? 1 : 0.6,
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
-                            justifyContent: 'center'
+                            gap: '10px'
                         }}
                     >
-                        <FaPlus /> Add Token
+                        <FaPlus /> Add Subscriber
                     </button>
+                    <a 
+                        href="https://youtube.com" 
+                        target="_blank" 
+                        rel="noreferrer"
+                        style={{
+                            padding: '16px 24px',
+                            backgroundColor: 'transparent',
+                            color: '#58a6ff',
+                            border: '1px solid #30363d',
+                            borderRadius: '12px',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            textDecoration: 'none'
+                        }}
+                    >
+                        <FaYoutube style={{ color: '#ff0000' }} /> Tutorial
+                    </a>
                 </div>
             </div>
 
-            {/* Tokens List */}
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+            {/* Subscribers List */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
                 {savedTokens.length === 0 ? (
                     <div style={{
                         gridColumn: '1 / -1',
-                        padding: '40px',
+                        padding: '60px 20px',
                         textAlign: 'center',
-                        backgroundColor: 'white',
+                        backgroundColor: '#161b22',
                         borderRadius: '16px',
-                        border: '2px dashed #cbd5e0',
-                        color: '#718096'
+                        border: '2px dashed #30363d',
+                        color: '#8b949e'
                     }}>
-                        <p style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>No subscriber tokens added yet</p>
-                        <p style={{ fontSize: '14px', marginTop: '10px' }}>Add tokens above to start copytrading</p>
+                        <FaDesktop style={{ fontSize: '40px', marginBottom: '15px', opacity: 0.5 }} />
+                        <h3 style={{ margin: '0 0 10px 0', color: '#c9d1d9' }}>No Active Subscribers</h3>
+                        <p style={{ margin: 0, fontSize: '14px' }}>Add subscriber tokens above to build your trading network</p>
                     </div>
                 ) : (
-                    savedTokens.map((t, index) => (
-                        <div key={index} style={{
-                            backgroundColor: 'white',
-                            padding: '20px',
+                    savedTokens.map((t, i) => (
+                        <div key={i} style={{
+                            backgroundColor: '#161b22',
+                            padding: '24px',
                             borderRadius: '16px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                            border: '1px solid #edf2f7',
+                            border: '1px solid #30363d',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '15px'
+                            gap: '16px'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{
-                                    backgroundColor: '#ebf4ff',
-                                    color: '#2b6cb0',
-                                    padding: '4px 12px',
-                                    borderRadius: '20px',
-                                    fontSize: '12px',
-                                    fontWeight: '700'
-                                }}>
-                                    Subscriber #{index + 1}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{
+                                        width: '40px', height: '40px',
+                                        backgroundColor: '#0d1117',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#58a6ff'
+                                    }}>
+                                        <FaShieldAlt />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff' }}>Subscriber Node</div>
+                                        <div style={{ fontSize: '12px', color: '#8b949e' }}>Channel ID: #{i+1}</div>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => removeToken(t)}
                                     style={{
-                                        background: 'none',
+                                        background: 'transparent',
                                         border: 'none',
-                                        color: '#e53e3e',
+                                        color: '#f85149',
                                         cursor: 'pointer',
-                                        padding: '5px',
-                                        display: 'flex',
-                                        alignItems: 'center'
+                                        padding: '8px'
                                     }}
-                                    title="Remove Subscriber"
                                 >
                                     <FaTrash />
                                 </button>
                             </div>
                             <div style={{
-                                fontFamily: 'monospace',
-                                color: '#4a5568',
-                                fontSize: '14px',
-                                backgroundColor: '#f7fafc',
-                                padding: '10px',
+                                backgroundColor: '#0d1117',
+                                padding: '12px',
                                 borderRadius: '8px',
-                                wordBreak: 'break-all'
+                                fontSize: '13px',
+                                fontFamily: 'monospace',
+                                color: '#8b949e',
+                                wordBreak: 'break-all',
+                                border: '1px solid #30363d'
                             }}>
-                                {t.slice(0, 8)}••••••••••••••••{t.slice(-4)}
+                                {t.slice(0, 10)}••••••••••••••••{t.slice(-6)}
                             </div>
                         </div>
                     ))
                 )}
             </div>
 
-            {/* Instructions */}
-            <div style={{
-                marginTop: '30px',
-                padding: '25px',
-                backgroundColor: 'white',
-                borderRadius: '16px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                color: '#4a5568'
-            }}>
-                <h4 style={{ margin: '0 0 15px 0', color: '#2d3748', borderBottom: '2px solid #ebf8ff', paddingBottom: '10px' }}>
-                    How it works
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px' }}>
-                    <li><strong>Real-time Replication:</strong> Every trade placed by your bot is instantly copied to all active subscriber accounts.</li>
-                    <li><strong>Multi-Account Support:</strong> You can add as many subscriber tokens as you need.</li>
-                    <li><strong>Demo & Real:</strong> Works seamlessly across both virtual and real money accounts.</li>
-                    <li><strong>Safety First:</strong> You can stop all copytrading at any time using the master toggle above.</li>
-                </ul>
+            {/* Footer Status */}
+            <div style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center', color: '#8b949e', fontSize: '12px' }}>
+                &copy; 2026 MesoflixLabs • Professional Execution Bridge v2.0.0
             </div>
 
-            {/* Toast Notification */}
+            {/* Toast */}
             {toast && (
                 <div style={{
                     position: 'fixed',
                     bottom: '30px',
                     right: '30px',
-                    zIndex: 10000,
+                    padding: '16px 24px',
+                    backgroundColor: toast.type === 'ok' ? '#238636' : '#da3633',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    fontWeight: '600',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    padding: '16px 24px',
-                    borderRadius: '12px',
-                    fontWeight: '700',
-                    backgroundColor: toast.type === 'ok' ? '#2f855a' : '#c53030',
-                    color: 'white',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-                    animation: 'slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                    zIndex: 9999,
+                    animation: 'slideInRight 0.3s ease-out'
                 }}>
                     {toast.type === 'ok' ? <FaCheckCircle /> : <FaTimesCircle />}
-                    <span>{toast.text}</span>
+                    {toast.text}
                 </div>
             )}
         </div>
     );
 };
+
+export default TokenManager;
+
 
 export default TokenManager;

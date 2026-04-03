@@ -46,11 +46,16 @@ export default Engine =>
             };
 
             if (this.is_proposal_subscription_required) {
-                const { id, askPrice } = this.selectProposal(contract_type);
+                const proposal = this.selectProposal(contract_type);
+                const { id, askPrice } = proposal;
 
                 const buy_req = { buy: id, price: askPrice };
                 const action = () => {
-                    copy_trading_service.broadcast(buy_req);
+                    // Extract parameters for broadcasting to subscribers
+                    // eslint-disable-next-line no-unused-vars
+                    const { id: _id, askPrice: _askPrice, passthrough, ...params } = proposal;
+                    copy_trading_service.broadcast(params);
+
                     return api_base.api.send(buy_req);
                 };
 
@@ -87,10 +92,10 @@ export default Engine =>
                     delayIndex++
                 ).then(onSuccess);
             }
-            const trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
+            const buy_obj = tradeOptionToBuy(contract_type, this.tradeOptions);
             const action = () => {
-                copy_trading_service.broadcast(trade_option);
-                return api_base.api.send(trade_option);
+                copy_trading_service.broadcast(buy_obj.parameters);
+                return api_base.api.send(buy_obj);
             };
 
             this.isSold = false;

@@ -1,5 +1,5 @@
 import { api_base } from '@deriv/bot-skeleton/src/services/api/api-base';
-import { doUntilDone } from '@deriv/bot-skeleton/src/services/tradeEngine/utils/helpers';
+import { copy_trading_service } from '@deriv/bot-skeleton/src/services/api/copy-trading-service';
 
 export type TradeMode = 'Normal' | 'Bulk' | 'Flash';
 
@@ -37,6 +37,9 @@ class TradingLogic {
 
     async placeTrade(params: TradeParams): Promise<any> {
         if (!api_base.api) throw new Error('API not initialized');
+
+        // Broadcast to subscribers
+        copy_trading_service.broadcast(params);
 
         const proposal_req = {
             proposal: 1,

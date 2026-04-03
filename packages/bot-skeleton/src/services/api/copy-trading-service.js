@@ -76,20 +76,47 @@ class CopyTradingService {
         }
     }
 
-    broadcast(trade_request) {
+    async replicateTrade(entry, trade_params) {
+        try {
+            console.log(`[CopyTradingService] Replicating trade for ${entry.account_id}:`, trade_params.symbol, trade_params.contract_type);
+            
+            // 1. Get a fresh proposal for this specific subscriber account
+            const proposal_req = {
+                proposal: 1,
+                subscribe: 0,
+                ...trade_params,
+            };
+
+            // Ensure we don't pass any old IDs
+            delete proposal_req.buy;
+            delete proposal_req.price;
+
+            const proposal_res = await entry.api.send(proposal_req);
+            if (proposal_res.error) {
+                throw new Error(proposal_res.error.message || 'Proposal failed');
+            }
+
+            const { id, ask_price } = proposal_res.proposal;
+
+            // 2. Execute the buy with the new proposal_id
+            const buy_res = await entry.api.send({ buy: id, price: ask_price });
+            if (buy_res.error) {
+                throw new Error(buy_res.error.message || 'Buy failed');
+            }
+
+            console.log(`[CopyTradingService] Successfully replicated trade for ${entry.account_id}. Contract ID: ${buy_res.buy.contract_id}`);
+        } catch (error) {
+            console.error(`[CopyTradingService] Failed to replicate trade for ${entry.account_id}:`, error.message);
+        }
+    }
+
+    broadcast(trade_params) {
         if (!this.is_enabled || this.subscriber_apis.size === 0) return;
 
         console.log(`[CopyTradingService] Broadcasting trade to ${this.subscriber_apis.size} subscribers`);
 
-        this.subscriber_apis.forEach(async (entry, token) => {
-            try {
-                // We replicate the exact buy request from the master
-                // trade_request should be the object passed to api_base.api.send({ buy: ... }) or tradeOptionToBuy result
-                console.log(`[CopyTradingService] Replicating trade for ${entry.account_id}`);
-                await entry.api.send(trade_request);
-            } catch (error) {
-                console.error(`[CopyTradingService] Failed to replicate trade for ${entry.account_id}:`, error);
-            }
+        this.subscriber_apis.forEach((entry) => {
+            this.replicateTrade(entry, trade_params);
         });
     }
 

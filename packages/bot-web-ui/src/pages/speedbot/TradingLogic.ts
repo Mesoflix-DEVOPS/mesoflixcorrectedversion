@@ -1,5 +1,7 @@
-import { api_base } from '@deriv/bot-skeleton/services/api/api-base';
-import { copy_trading_service } from '@deriv/bot-skeleton/services/api/copy-trading-service';
+// @ts-ignore
+import { api_base } from '@deriv/bot-skeleton/src/services/api/api-base';
+// @ts-ignore
+import { copy_trading_service } from '@deriv/bot-skeleton/src/services/api/copy-trading-service';
 
 export type TradeMode = 'Normal' | 'Bulk' | 'Flash';
 
@@ -29,7 +31,7 @@ export interface TradeResult {
 class TradingLogic {
     private is_running = false;
     private flash_limit = 5;
-    private flash_interval: ReturnType<typeof setInterval> | null = null;
+    private flash_interval: any = null;
 
     setFlashLimit(limit: number) {
         this.flash_limit = limit;

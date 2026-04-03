@@ -78,7 +78,7 @@
         "test:eslint-one": "f () { nx test @deriv/$1 --target=test:eslint ;}; f",
         "test:eslint-since": "f () { nx affected --target=eslint ;}; f",
         "bootstrap:ci": "npm ci --strict-peer-deps --legacy-peer-deps --verbose",
-        "bootstrap": "npm ci --strict-peer-deps --legacy-peer-deps --verbose",
+        "bootstrap": "npm ci --legacy-peer-deps --force --verbose",
         "bootstrap:dev": "npm install --strict-peer-deps --legacy-peer-deps --verbose",
         "build:publish": "npm run build:publish --workspace=@deriv/* --",
         "build:local": "f () { nx run-many --target=build --projects=@deriv/bot-web-ui,@deriv/trader --parallel=2 ;}; f",
